@@ -23,13 +23,18 @@ let a_Position;
 let u_FragColor;
 let u_Size;
 
+const POINT = 0;
+const TRIANGLE = 1;
+const CIRCLE = 2;
+
 // get the canvas and gl context
 function setupWebGL() {
     // Retrieve <canvas> element
     canvas = document.getElementById('webgl');
 
     // Get the rendering context for WebGL
-    gl = getWebGLContext(canvas);
+    // gl = getWebGLContext(canvas);
+    gl = canvas.getContext("webgl", { preserveDrawingBuffer: true } );
     if (!gl) {
         console.log('Failed to get the rendering context for WebGL');
         return;
@@ -68,10 +73,16 @@ function connectVariablesToGLSL() {
 
 let g_selectedColor = [1.0, 1.0, 1.0, 1.0];
 let g_selectedSize = 4;
+let g_selectedType = "point";
 
 function addActionsForHtmlUI() {
-    // Clear button
+    // Clear Canvas button
     document.getElementById("button_clearCanvas").onclick = function() { g_shapesList = []; renderAllShapes(); }
+
+    // Shape buttons
+    document.getElementById("button_squares").onclick = function() { g_selectedType = POINT; }
+    document.getElementById("button_triangles").onclick = function() { g_selectedType = TRIANGLE; }
+    document.getElementById("button_circles").onclick = function() { g_selectedType = CIRCLE; }
     
     // RGB Slider Events
     document.getElementById("slider_red").addEventListener('mouseup', function() { g_selectedColor[0] = this.value/100; });
@@ -91,6 +102,7 @@ function main() {
 
     // Register function (event handler) to be called on a mouse press
     canvas.onmousedown = click;
+    canvas.onmousemove = function(ev) { if (ev.buttons == 1) click(ev) };
 
     // Specify the color for clearing <canvas>
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -105,7 +117,14 @@ function click(ev) {
 
     let [x,y] = convertCoordinatesEventToGL(ev);
 
-    let point = new Point();
+    let point;
+
+    if (g_selectedType == TRIANGLE) {
+        point = new Triangle();
+    } else {
+        point = new Point();
+    }
+
     point.position = [x,y];
     point.color = g_selectedColor.slice();
     point.size = g_selectedSize;
