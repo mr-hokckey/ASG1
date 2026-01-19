@@ -76,6 +76,7 @@ let g_selectedType = "point";
 
 function addActionsForHtmlUI() {
     // Clear Canvas button
+    document.getElementById("button_undo").onclick = function() { g_shapesList.pop(); renderAllShapes(); }
     document.getElementById("button_clearCanvas").onclick = function() { g_shapesList = []; renderAllShapes(); }
 
     // Shape buttons
