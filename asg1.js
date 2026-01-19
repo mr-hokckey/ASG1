@@ -33,7 +33,6 @@ function setupWebGL() {
     canvas = document.getElementById('webgl');
 
     // Get the rendering context for WebGL
-    // gl = getWebGLContext(canvas);
     gl = canvas.getContext("webgl", { preserveDrawingBuffer: true } );
     if (!gl) {
         console.log('Failed to get the rendering context for WebGL');
@@ -84,7 +83,7 @@ function addActionsForHtmlUI() {
     document.getElementById("button_triangles").onclick = function() { g_selectedType = TRIANGLE; }
     document.getElementById("button_circles").onclick = function() { g_selectedType = CIRCLE; }
     
-    // RGB Slider Events
+    // Slider Events
     document.getElementById("slider_red").addEventListener('mouseup', function() { g_selectedColor[0] = this.value/100; });
     document.getElementById("slider_green").addEventListener('mouseup', function() { g_selectedColor[1] = this.value/100; });
     document.getElementById("slider_blue").addEventListener('mouseup', function() { g_selectedColor[2] = this.value/100; });
@@ -102,7 +101,8 @@ function main() {
 
     // Register function (event handler) to be called on a mouse press
     canvas.onmousedown = click;
-    canvas.onmousemove = function(ev) { if (ev.buttons == 1) click(ev) };
+    // Held click only works when SHIFT is also held.
+    canvas.onmousemove = function(ev) { if (ev.buttons && ev.shiftKey == 1) click(ev) };
 
     // Specify the color for clearing <canvas>
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
