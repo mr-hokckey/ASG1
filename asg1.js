@@ -1,6 +1,6 @@
 // ColoredPoint.js (c) 2012 matsuda
 // Vertex shader program
-var VSHADER_SOURCE =`
+var VSHADER_SOURCE = `
     attribute vec4 a_Position;
     uniform float u_Size;
     void main() {
@@ -9,7 +9,7 @@ var VSHADER_SOURCE =`
     }`;
 
 // Fragment shader program
-var FSHADER_SOURCE =`
+var FSHADER_SOURCE = `
     precision mediump float;
     uniform vec4 u_FragColor;  // uniform変数
     void main() {
@@ -33,7 +33,7 @@ function setupWebGL() {
     canvas = document.getElementById('webgl');
 
     // Get the rendering context for WebGL
-    gl = canvas.getContext("webgl", { preserveDrawingBuffer: true } );
+    gl = canvas.getContext("webgl", { preserveDrawingBuffer: true });
     if (!gl) {
         console.log('Failed to get the rendering context for WebGL');
         return;
@@ -77,25 +77,27 @@ let g_selectedSegments = 10;
 
 function addActionsForHtmlUI() {
     // Clear Canvas button
-    document.getElementById("button_undo").onclick = function() { g_shapesList.pop(); renderAllShapes(); }
-    document.getElementById("button_clearCanvas").onclick = function() { g_shapesList = []; renderAllShapes(); }
+    document.getElementById("button_undo").onclick = function () { g_shapesList.pop(); renderAllShapes(); }
+    document.getElementById("button_clearCanvas").onclick = function () { g_shapesList = []; renderAllShapes(); }
+    document.getElementById("button_drawPorygon").onclick = function () { g_shapesList = []; drawPorygon(); }
+
 
     // Shape buttons
-    document.getElementById("button_squares").onclick = function() { g_selectedType = POINT; }
-    document.getElementById("button_triangles").onclick = function() { g_selectedType = TRIANGLE; }
-    document.getElementById("button_circles").onclick = function() { g_selectedType = CIRCLE; }
-    
-    // Slider Events
-    document.getElementById("slider_red").addEventListener('mouseup', function() { g_selectedColor[0] = this.value/100; });
-    document.getElementById("slider_green").addEventListener('mouseup', function() { g_selectedColor[1] = this.value/100; });
-    document.getElementById("slider_blue").addEventListener('mouseup', function() { g_selectedColor[2] = this.value/100; });
+    document.getElementById("button_squares").onclick = function () { g_selectedType = POINT; }
+    document.getElementById("button_triangles").onclick = function () { g_selectedType = TRIANGLE; }
+    document.getElementById("button_circles").onclick = function () { g_selectedType = CIRCLE; }
 
-    document.getElementById("slider_size").addEventListener('mouseup', function() { g_selectedSize = this.value; });
-    document.getElementById("slider_segments").addEventListener('mouseup', function() { g_selectedSegments = this.value; });
+    // Slider Events
+    document.getElementById("slider_red").addEventListener('mouseup', function () { g_selectedColor[0] = this.value / 100; });
+    document.getElementById("slider_green").addEventListener('mouseup', function () { g_selectedColor[1] = this.value / 100; });
+    document.getElementById("slider_blue").addEventListener('mouseup', function () { g_selectedColor[2] = this.value / 100; });
+
+    document.getElementById("slider_size").addEventListener('mouseup', function () { g_selectedSize = this.value; });
+    document.getElementById("slider_segments").addEventListener('mouseup', function () { g_selectedSegments = this.value; });
 }
 
 function main() {
-    
+
     setupWebGL();
 
     connectVariablesToGLSL();
@@ -105,7 +107,7 @@ function main() {
     // Register function (event handler) to be called on a mouse press
     canvas.onmousedown = click;
     // Held click only works when SHIFT is also held.
-    canvas.onmousemove = function(ev) { if (ev.buttons && ev.shiftKey == 1) click(ev) };
+    canvas.onmousemove = function (ev) { if (ev.buttons && ev.shiftKey == 1) click(ev) };
 
     // Specify the color for clearing <canvas>
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -118,7 +120,7 @@ var g_shapesList = [];
 
 function click(ev) {
 
-    let [x,y] = convertCoordinatesEventToGL(ev);
+    let [x, y] = convertCoordinatesEventToGL(ev);
 
     let point;
 
@@ -130,7 +132,7 @@ function click(ev) {
         point = new Point();
     }
 
-    point.position = [x,y];
+    point.position = [x, y];
     point.color = g_selectedColor.slice();
     point.size = g_selectedSize;
     if (g_selectedType == CIRCLE) {
@@ -150,7 +152,7 @@ function convertCoordinatesEventToGL(ev) {
     x = ((x - rect.left) - canvas.width / 2) / (canvas.width / 2);
     y = (canvas.height / 2 - (y - rect.top)) / (canvas.height / 2);
 
-    return([x,y]);
+    return ([x, y]);
 }
 
 function renderAllShapes() {
@@ -160,5 +162,62 @@ function renderAllShapes() {
     var len = g_shapesList.length;
     for (var i = 0; i < len; i++) {
         g_shapesList[i].render();
+    }
+}
+
+function drawPorygon() {
+    // g_selectedColor = [0.0, 0.0, 1.0, 1.0];
+    gl.uniform4f(u_FragColor, 0.5, 0.75, 1.0, 1.0);
+    drawTriangle([-0.8, -0.2, -0.9, -0.8, -0.3, -0.3]);
+    drawTriangle([-0.9, -0.8, -0.3, -0.3, -0.6, -0.9]);
+    gl.uniform4f(u_FragColor, 0.5, 0.5, 1.0, 1.0);
+    drawTriangle([-0.3, -0.3, -0.6, -0.9, -0.2, -0.4]);
+    gl.uniform4f(u_FragColor, 0.5, 0.5, 0.75, 1.0);
+    drawTriangle([-0.6, -0.9, -0.2, -0.4, -0.1, -0.7]);
+
+    gl.uniform4f(u_FragColor, 0.6, 0.3, 0.3, 1.0);
+    drawTriangle([-0.2, -0.4, -0.1, -0.7, 0.1, -0.2]);
+    drawTriangle([-0.1, -0.7, 0.1, -0.2, 0.3, -0.5]);
+    drawTriangle([0.1, -0.2, 0.3, -0.5, 0.4, -0.1]);
+    drawTriangle([0.3, -0.5, 0.4, -0.1, 0.7, -0.1]);
+    drawTriangle([0.4, -0.1, 0.7, -0.1, 0.5, 0.2]);
+    drawTriangle([0.7, -0.1, 0.5, 0.2, 0.8, 0.4]);
+
+    gl.uniform4f(u_FragColor, 1.0, 0.3, 0.3, 1.0);
+    drawTriangle([0.5, 0.2, 0.8, 0.4, 0.3, 0.4]);
+    drawTriangle([0.8, 0.4, 0.3, 0.4, 0.5, 0.7]);
+    gl.uniform4f(u_FragColor, 1.0, 0.5, 0.5, 1.0);
+    drawTriangle([0.3, 0.4, 0.5, 0.7, 0.1, 0.8]);
+    drawTriangle([0.3, 0.4, 0.1, 0.8, -0.3, 0.5]);
+    drawTriangle([0.1, 0.8, 0.3, 0.4, -0.3, 0.5]);
+    drawTriangle([0.3, 0.4, -0.3, 0.5, 0, 0.3]);
+    drawTriangle([-0.3, 0.5, 0, 0.3, -0.1, 0]);
+    drawTriangle([-0.3, 0.5, -0.1, 0, -0.8, -0.2]);
+    drawTriangle([-0.1, 0, -0.8, -0.2, -0.3, -0.3]);
+    drawTriangle([-0.1, 0, -0.8, -0.2, -0.3, -0.3]);
+    gl.uniform4f(u_FragColor, 1.0, 0.3, 0.3, 1.0);
+    drawTriangle([-0.1, 0, -0.3, -0.3, -0.2, -0.4]);
+    drawTriangle([-0.1, 0, -0.2, -0.4, 0.1, -0.2]);
+
+    gl.uniform4f(u_FragColor, 1.0, 1.0, 1.0, 1.0);
+    drawTriangle([0, 0.3, -0.1, 0, 0.3, 0.4]);
+    gl.uniform4f(u_FragColor, 0.95, 0.95, 0.95, 1.0);
+    drawTriangle([-0.1, 0, 0.3, 0.4, 0.1, -0.2]);
+    drawTriangle([0.3, 0.4, 0.1, -0.2, 0.5, 0.2]);
+    gl.uniform4f(u_FragColor, 0.8, 0.8, 0.8, 1.0);
+    drawTriangle([0.1, -0.2, 0.5, 0.2, 0.4, -0.1]);
+
+    gl.uniform4f(u_FragColor, 0.1, 0.1, 0.1, 1.0);
+    let angleStep = 360 / 10;
+    for (var angle = 0; angle < 360; angle = angle + angleStep) {
+        let centerPt = [0.2, 0.1];
+        let angle1 = angle;
+        let angle2 = angle + angleStep;
+        let vec1 = [Math.cos(angle1 * Math.PI / 180) * 0.05, Math.sin(angle1 * Math.PI / 180) * 0.05];
+        let vec2 = [Math.cos(angle2 * Math.PI / 180) * 0.05, Math.sin(angle2 * Math.PI / 180) * 0.05];
+        let pt1 = [centerPt[0] + vec1[0], centerPt[1] + vec1[1]];
+        let pt2 = [centerPt[0] + vec2[0], centerPt[1] + vec2[1]];
+
+        drawTriangle([0.2, 0.1, pt1[0], pt1[1], pt2[0], pt2[1]]);
     }
 }
