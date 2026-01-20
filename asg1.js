@@ -73,6 +73,7 @@ function connectVariablesToGLSL() {
 let g_selectedColor = [1.0, 1.0, 1.0, 1.0];
 let g_selectedSize = 4;
 let g_selectedType = "point";
+let g_selectedSegments = 10;
 
 function addActionsForHtmlUI() {
     // Clear Canvas button
@@ -90,6 +91,7 @@ function addActionsForHtmlUI() {
     document.getElementById("slider_blue").addEventListener('mouseup', function() { g_selectedColor[2] = this.value/100; });
 
     document.getElementById("slider_size").addEventListener('mouseup', function() { g_selectedSize = this.value; });
+    document.getElementById("slider_segments").addEventListener('mouseup', function() { g_selectedSegments = this.value; });
 }
 
 function main() {
@@ -122,6 +124,8 @@ function click(ev) {
 
     if (g_selectedType == TRIANGLE) {
         point = new Triangle();
+    } else if (g_selectedType == CIRCLE) {
+        point = new Circle();
     } else {
         point = new Point();
     }
@@ -129,6 +133,9 @@ function click(ev) {
     point.position = [x,y];
     point.color = g_selectedColor.slice();
     point.size = g_selectedSize;
+    if (g_selectedType == CIRCLE) {
+        point.segments = g_selectedSegments;
+    }
     g_shapesList.push(point);
 
     renderAllShapes();
